@@ -30,7 +30,7 @@ module.exports = {
 │ 📘 Facebook : id=61590496500848
 │ 💬 Messenger: id=61590496500848
 │ 📞 WhatsApp : 01410577478
-╰────────────────╯`;
+╰────────────────`;
 
     const cacheDir = path.join(__dirname, "cache");
     const imgPath = path.join(cacheDir, "owner.jpg");
