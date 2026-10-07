@@ -1,14 +1,14 @@
 module.exports = {
   config: {
     name: "tag",
-    alises: [],
+    aliases: ["tagall"],
     category: 'box chat',
     role: 0,
     author: 'dipto | Anik Islam Sadik',
     countDown: 3,
-    description: { en: 'Tags a user to the provided name or message reply.' },
+    description: { en: 'Tags a user to the provided name, message reply, or tags everyone.' },
     guide: {
-      en: `1. Reply to a message\n2. Use {pm}tag [name]\n3. Use {pm}tag [name] [message]`
+      en: `1. Reply to a message\n2. Use {pm}tag [name]\n3. Use {pm}tag [name] [message]\n4. Use {pm}tagall [message] or {pm}tag all [message]`
     },
   },
   onStart: async ({ api, event, usersData, threadsData, args }) => {
@@ -24,7 +24,17 @@ module.exports = {
       let extraMessage = "";
       let targetMessageID = messageID;
 
-      if (messageReply) {
+      const commandNameUsed = event.body?.trim().split(' ')[0].toLowerCase();
+      const isTagAll = commandNameUsed?.endsWith('all') || args[0]?.toLowerCase() === 'all';
+
+      if (isTagAll) {
+        if (args[0]?.toLowerCase() === 'all') {
+          extraMessage = args.slice(1).join(' ').trim();
+        } else {
+          extraMessage = args.join(' ').trim();
+        }
+        namesToTag = combined;
+      } else if (messageReply) {
         targetMessageID = messageReply.messageID;
         const uid = messageReply.senderID;
         const name = await usersData.getName(uid);
@@ -32,7 +42,7 @@ module.exports = {
         extraMessage = args.join(' ');
       } else {
         if (args.length === 0) {
-          return api.sendMessage('❌ Format: tag [name] or tag [name] [message]', threadID, messageID);
+          return api.sendMessage('❌ Format: tag [name] or tag [name] [message] | tagall [message]', threadID, messageID);
         }
 
         const input = args.join(' ');
@@ -69,8 +79,22 @@ module.exports = {
       });
 
       const bodyText = bodyParts.join(' ');
-      const finalBody = extraMessage ? `${bodyText} - ${extraMessage}` : bodyText;
+      let finalBody = bodyText;
 
+      if (isTagAll) {
+        const STYLE_HEADER = "✨ 𝑨𝒕𝒕𝒆𝒏𝒕𝒊𝒐𝒏 𝑷𝒍𝒆𝒂𝒔𝒆 ✨\n✧･ﾟ: *✧･ﾟ:* 　　*:･ﾟ✧*:･ﾟ✧";
+        const STYLE_LINE = "❁ ────── ❀ ────── ❁";
+        
+        finalBody = `${STYLE_HEADER}\n${STYLE_LINE}\n`;
+        if (extraMessage) {
+          finalBody += `${extraMessage}\n${STYLE_LINE}\n`;
+        }
+        finalBody += bodyText;
+      } else {
+        finalBody = extraMessage ? `${bodyText} - ${extraMessage}` : bodyText;
+      }
+
+name:
       return api.sendMessage({
         body: finalBody,
         mentions
