@@ -59,7 +59,7 @@ const utils = {
     }
 };
 
-const triggers = ["baby", "bby", "bot", "jan", "babu", "janu", "বট"];
+const triggers = ["baby", "bby", "bot", "jan", "babu", "janu", "suna", "sara", "mikasa", "hinata", "xadika", "alya"];
 
 async function sendAttachmentReply(api, event) {
     const attType = event.attachments?.[0]?.type;
@@ -90,7 +90,7 @@ module.exports.config = {
     countDown: 0,
     role: 0,
     description: "api by dipto || aryan",
-    category: "CHATTING",
+    category: "BOX CHAT",
     guide: {
         en: "{pn} [anyMessage] OR\nteach [YourMessage] - [Reply1], [Reply2], [Reply3]... OR\nteach react [YourMessage] - [react1], [react2]... OR\nteach amar [YourMessage] - [reply] OR\nteach sticker - [Reply1], [Reply2]... OR\nteach picture - [Reply1], [Reply2]... OR\nremove [YourMessage] OR\nrm [YourMessage] - [indexNumber] OR\nedit [YourMessage] - [NewReply] OR\nmsg [YourMessage] OR\nlist OR\nlist all"
     }
@@ -112,4 +112,186 @@ module.exports.onStart = async ({ api, event, args, usersData }) => {
 
         if (args[0] === 'remove') {
             const key = body.replace("remove ", "");
-            const data
+            const data = await fetchWithFallback(`/baby?remove=${encodeURIComponent(key)}&senderID=${uid}`);
+            return api.sendMessage(data.message, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'rm' && body.includes('-')) {
+            const [key, index] = body.replace("rm ", "").split(/\s*-\s*/);
+            const data = await fetchWithFallback(`/baby?remove=${encodeURIComponent(key)}&index=${index}`);
+            return api.sendMessage(data.message, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'list') {
+            if (args[1] === 'all') {
+                const data = await fetchWithFallback(`/baby?list=all`);
+                const limit = parseInt(args[2]) || 100;
+                const limited = data?.teacher?.teacherList?.slice(0, limit) || [];
+                const teachers = await Promise.all(limited.map(async (item) => {
+                    const number = Object.keys(item)[0];
+                    const value = item[number];
+                    const name = await usersData.getName(number).catch(() => number) || "Not found";
+                    return { name, value };
+                }));
+                teachers.sort((a, b) => b.value - a.value);
+                const output = teachers.map((t, i) => `${i + 1}/ ${t.name}: ${t.value}`).join('\n');
+                return api.sendMessage(`Total Teach = ${data.length}\n👑 | List of Teachers of baby\n${output}`, event.threadID, event.messageID);
+            }
+            const data = await fetchWithFallback(`/baby?list=all`);
+            return api.sendMessage(`❇️ | Total Teach = ${data.length || "api off"}\n♻️ | Total Response = ${data.responseLength || "api off"}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'msg') {
+            const key = body.replace("msg ", "");
+            const data = await fetchWithFallback(`/baby?list=${encodeURIComponent(key)}`);
+            return api.sendMessage(`Message ${key} = ${data.data}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'edit') {
+            const parts = body.replace("edit ", "").split(/\s*-\s*/);
+            if (parts.length < 2)
+                return api.sendMessage('❌ | Invalid format! Use: edit [YourMessage] - [NewReply]', event.threadID, event.messageID);
+            const data = await fetchWithFallback(`/baby?edit=${encodeURIComponent(parts[0])}&replace=${encodeURIComponent(parts[1])}&senderID=${uid}`);
+            return api.sendMessage(`changed ${data.message}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'teach' && args[1] === 'sticker') {
+            const reply = body.replace("teach sticker ", "").replace(/^-\s*/, "").trim();
+            if (!reply) return api.sendMessage('❌ | Invalid format! Use: teach sticker - [Reply1], [Reply2]...', event.threadID, event.messageID);
+            const data = normalize((await axios.get(`${SECONDARY_API}/baby/sticker?teach=1&reply=${encodeURIComponent(reply)}&senderID=${uid}`, { timeout: 10000 })).data || {});
+            return api.sendMessage(`✅ ${data.message}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'teach' && args[1] === 'picture') {
+            const reply = body.replace("teach picture ", "").replace(/^-\s*/, "").trim();
+            if (!reply) return api.sendMessage('❌ | Invalid format! Use: teach picture - [Reply1], [Reply2]...', event.threadID, event.messageID);
+            const data = normalize((await axios.get(`${SECONDARY_API}/baby/picture?teach=1&reply=${encodeURIComponent(reply)}&senderID=${uid}`, { timeout: 10000 })).data || {});
+            return api.sendMessage(`✅ ${data.message}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'teach' && args[1] === 'react') {
+            const parts = body.replace("teach react ", "").split(/\s*-\s*/);
+            if (parts.length < 2)
+                return api.sendMessage('❌ | Invalid format! Use: teach react [YourMessage] - ❤️, 😀', event.threadID, event.messageID);
+            const data = await fetchWithFallback(`/baby?teach=${encodeURIComponent(parts[0])}&react=${encodeURIComponent(parts[1])}`);
+            return api.sendMessage(`✅ Reacts added: ${data.message}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'teach' && args[1] === 'amar') {
+            const parts = body.replace("teach amar ", "").split(/\s*-\s*/);
+            if (parts.length < 2)
+                return api.sendMessage('❌ | Invalid format! Use: teach amar [YourMessage] - [reply]', event.threadID, event.messageID);
+            const data = await fetchWithFallback(`/baby?teach=${encodeURIComponent(parts[0])}&senderID=${uid}&reply=${encodeURIComponent(parts[1])}&key=intro`);
+            return api.sendMessage(`✅ Intro reply added: ${data.message}`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'teach') {
+            const parts = body.replace("teach ", "").split(/\s*-\s*/);
+            if (parts.length < 2 || parts[1].length < 2)
+                return api.sendMessage('❌ | Invalid format! Use: teach [YourMessage] - [Reply1], [Reply2]', event.threadID, event.messageID);
+            const data = await fetchWithFallback(`/baby?teach=${encodeURIComponent(parts[0])}&reply=${encodeURIComponent(parts[1])}&senderID=${uid}&threadID=${event.threadID}`);
+            let teacherName = "Unknown";
+            try {
+                teacherName = (await usersData.get(data.teacher || uid))?.name || await usersData.getName(uid) || "Unknown";
+            } catch {
+                teacherName = await usersData.getName(uid).catch(() => "Unknown");
+            }
+            const outputMessage = utils.monospace(`✅ Replies added: ${data.message}\n👤 Teacher: ${teacherName}\n📚 Total Teachs: ${data.teachs}`);
+            return api.sendMessage(outputMessage, event.threadID, event.messageID);
+        }
+
+        if (["amar name ki", "amr nam ki", "amar nam ki", "amr name ki", "whats my name"].some(p => body.includes(p))) {
+            const data = await fetchWithFallback(`/baby?text=amar name ki&senderID=${uid}&key=intro`);
+            return api.sendMessage(data.reply, event.threadID, event.messageID);
+        }
+
+        const data = await fetchWithFallback(`/baby?text=${encodeURIComponent(body)}&senderID=${uid}&threadID=${event.threadID}&font=1`);
+        const replyText = utils.monospace(data.reply);
+        api.sendMessage(replyText, event.threadID, (error, info) => {
+            global.GoatBot.onReply.set(info.messageID, {
+                commandName: "baby",
+                type: "reply",
+                messageID: info.messageID,
+                author: event.senderID
+            });
+        }, event.messageID);
+
+    } catch (e) {
+        console.log(e);
+        api.sendMessage("Check console for error", event.threadID, event.messageID);
+    }
+};
+
+module.exports.onReply = async ({ api, event }) => {
+    try {
+        if (event.type !== "message_reply") return;
+
+        if (event.attachments?.length > 0) {
+            const handled = await sendAttachmentReply(api, event);
+            if (handled) return;
+        }
+
+        const data = await fetchWithFallback(`/baby?text=${encodeURIComponent(event.body?.toLowerCase() || "")}&senderID=${event.senderID}&threadID=${event.threadID}&font=1`);
+        const replyText = utils.monospace(data.reply);
+        await api.sendMessage(replyText, event.threadID, (error, info) => {
+            global.GoatBot.onReply.set(info.messageID, {
+                commandName: "baby",
+                type: "reply",
+                messageID: info.messageID,
+                author: event.senderID
+            });
+        }, event.messageID);
+    } catch (err) {
+        return api.sendMessage(`Error: ${err.message}`, event.threadID, event.messageID);
+    }
+};
+
+module.exports.onChat = async ({ api, event, usersData }) => {
+    try {
+        const body = event.body ? event.body.toLowerCase() : "";
+        const hasTrigger = triggers.some(t => body.startsWith(t));
+        if (!hasTrigger) return;
+
+        if (event.attachments?.length > 0) {
+            const handled = await sendAttachmentReply(api, event);
+            if (handled) return;
+        }
+
+        const arr = body.replace(/^\S+\s*/, "");
+        const uid = event.senderID;
+        const senderName = (await usersData.getName(uid)) || "User";
+
+        if (!arr) {
+            const baseReplies = [
+                "তোর তো বিয়ে হয় নাই বেবি পাইলি কই-🤦🏻", "পরকিয়া করছোছ নাকি শালা-🥲🤧", "তোকে ছাড়া বড় মন খারাপ লাগে 💔", "তোরে খুব মিস করছি জানিস? 🥺", "আপনার যদি পার্সোনাল বেবি না থাকে তাহলে আমার বসের সাথে প্রেম করুন🌚", "শুনো আমি আজাইরা না আমি ফুল টাইম বেকার-😌😁", "বেবি ডাকবা না 🍼 আমার বোতল শেষ এখন চা খাই😋",
+                "ডিসটার্ব করিস না জামাই আদর করতেছে-🌚💋", "এত ডাকিস না এমন থাপ্পর দিমু পেন্টে মুইতা দিবি-😾👋🏻", "বেবি ডাকিস না 🍼 খাওয়া-😒👍🏻", "আকাশের সাথে প্রেম করলে দশ টাকা দিমু🌚", "এভাবে ডাকার কি আছে কি বলবা বলো🙈", "আমি bot না রে ভাই আমি তোর ক্রাশের এক্স-😏", "ওই ডিস্টার্ব করিস না আমি Netflix এ নাটক দেখি😾🫲🏻",
+                "কি ডাকোস কেন টাকা শেষ নাকি-🌚🤌🏻", "পিনিক ধরেছে যখন বটকে না ডেকে লেবু খান তখন🍋🐸", "ভিডিও কল দিব নাকি সোনা 🌚🫦", "আম্মু ডাক শালা 😾🦶🏻", "উষ্টা খাইতে না চাইলে সামনে থেকে সর তোদের বস আসছে😡🙈", "আয়নায় মুখ দেখছিস? Bot ও ভয় পায়-👻", "এত মেসেজ দিস না আমার আঙুলে ব্যাথা করে-👆🏻🥺",
+                "বেবি না ডাইকা আকাশকে গার্লফ্রেন্ড খুজে দে-🙃🫶🏻", "ডাকিস না তারেক জিয়ার সাথে মিটিংয়ে আছি 😒🖐🏻", "বস ডাক বস😾✌🏻", "বেবি ডাকিস না পরে কোলে উঠে অন্য কিছু খেতে মন চাইবে🌚💋", "আমি ঘুমামু ডাকলে ১০ টাকা জরিমানা-😴📝", "সোনা বললে লজ্জা লাগে 🫣 আমি সিঙ্গেল প্রো ম্যাক্স🐸🫂", 
+            ];
+            const mentionObj = utils.realMention(senderName, uid, baseReplies[Math.floor(Math.random() * baseReplies.length)]);
+            return await api.sendMessage(mentionObj, event.threadID, (error, info) => {
+                if (info) {
+                    global.GoatBot.onReply.set(info.messageID, {
+                        commandName: "baby",
+                        type: "reply",
+                        messageID: info.messageID,
+                        author: event.senderID
+                    });
+                }
+            }, event.messageID);
+        }
+
+        const data = await fetchWithFallback(`/baby?text=${encodeURIComponent(arr)}&senderID=${uid}&threadID=${event.threadID}&font=1`);
+        const replyText = utils.monospace(data.reply);
+        await api.sendMessage(replyText, event.threadID, (error, info) => {
+            global.GoatBot.onReply.set(info.messageID, {
+                commandName: "baby",
+                type: "reply",
+                messageID: info.messageID,
+                author: event.senderID
+            });
+        }, event.messageID);
+    } catch (err) {
+        console.error("onChat Error:", err);
+    }
+};
