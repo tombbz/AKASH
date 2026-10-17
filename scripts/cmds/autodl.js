@@ -627,7 +627,7 @@ module.exports = {
 🔻 SIZE — ${formatSize(stats.size)}
 🔻 TIME — ${elapsed}s
 ────────────────────
-⚙️ POWERED BY AKASH`;
+⚙️ POWERED BY ꪖᴋꪖꪶʜ ꪖʜᴍᴇᴅ`;
 
       await message.reply({
         body: caption,
