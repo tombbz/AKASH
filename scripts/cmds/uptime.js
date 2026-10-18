@@ -8,7 +8,7 @@ module.exports = {
     name: "up",
     aliases: ["uptime"],
     version: "0.0.7",
-    author: "Anik Islam Sadik",
+    author: "AKASH AHMED",
     countDown: 3,
     role: 0,
     shortDescription: "bot stats image",
@@ -80,7 +80,7 @@ module.exports = {
         `Uptime: ${uptimeStr}`,
         `Ping: ${ping} ms`,
         `CPU Load: ${cpuUsage}`,
-        `Owner: Anik Islam Sadik`
+        `Owner: AKASH AHMED`
       ];
       ctx.fillStyle = "#F0F0F0";
       ctx.font = "bold 40px Sans";
