@@ -2,13 +2,13 @@ module.exports = {
   config: {
     name: "listbox",
     aliases: ["grouplist", "listgroup"],
-    author: "Anik Islam Sadik",
+    author: "xalman",
     version: "2.7",
     cooldowns: 5,
     role: 2,
     shortDescription: { en: "List all groups with pagination and control options." },
     longDescription: { en: "List all group chats the bot is in with options to leave or join." },
-    category: "GROUP",
+    category: "BOX CHAT",
     guide: { en: "{p}{n} [page_number]" }
   },
 
@@ -151,4 +151,4 @@ function getPageMessage(groups, page, limit, totalPages) {
   });
   message += `│ Page: ${page}/${totalPages}\n╰──────╯\n\n💡 Reply with:\n"next" - Next page\n"back" - Previous page\n"left [num]" - Leave group (e.g. left 1)\n"join [num]" - Add you to group (e.g. join 1)`;
   return message;
-                       }
+        }
