@@ -6,7 +6,7 @@ module.exports = {
     name: "uptime3",
     aliases: ["up3"],
     version: "1.2",
-    author: "Anik Islam Sadik",
+    author: "AKASH AHMED",
     countDown: 5,
     role: 0,
     shortDescription: "system uptime",
@@ -81,7 +81,7 @@ module.exports = {
 ║
 ║ ⚙️ PID      : ${process.pid}
 ║ 🛠 Node.js  : ${process.version}
-║ ⚡ Owner   : Anik Islam Sadik
+║ ⚡ Owner   : AKASH AHMED 
 ╠═════════════════════╣
 ║    ✅ SYSTEM RUNNING
 ╚═════════════════════╝
