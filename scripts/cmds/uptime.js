@@ -110,7 +110,7 @@ module.exports = {
 ⏳ Uptime: ${uptimeStr}
 📶 Ping: ${ping} ms
 🖥 CPU Load: ${cpuUsage}
-👑 Owner: ${AKASH AHMED}
+👑 Owner: ${owner}
 ✿•≫───────────────≪•✿
 `;
 
