@@ -79,7 +79,7 @@
   "autoUptime": {
     "enable": true,
     "timeInterval": 180,
-    "url": "",
+    "url": "https://akash-1-kigf.onrender.com",
     "notes": "the value of timeInterval is seconds, url is the url you want to send the request to (automatically detected for hosting glitch or replit)"
   },
   "autoLoadScripts": {
