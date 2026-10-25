@@ -3,7 +3,7 @@ module.exports = {
     name: "bump",
     aliases: ["b"],
     version: "2.0",
-    author: "Anik Islam Sadik",
+    author: "AKASH",
     countDown: 3,
     role: 0,
     category: "box chat",
