@@ -7,7 +7,7 @@ module.exports = {
     name: "owner",
     aliases: ["info"],
     version: "1.3.0",
-    author: "Anik Islam Sadik",
+    author: "AKASH",
     role: 0,
     shortDescription: "Owner information with image",
     category: "Information",
