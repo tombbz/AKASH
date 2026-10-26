@@ -1,23 +1,64 @@
-const fs = require("fs-extra");
-const request = require("request");
-const path = require("path");
+const axios = require("axios");
+
+const API_CONFIG_URL = "https://raw.githubusercontent.com/negative-xalman/xalmanx210/refs/heads/main/apis.json";
+const API_KEY = "AKASH";
+let apiBaseUrl = null;
+let apiConfigRequest = null;
+
+async function getApiBaseUrl() {
+  if (apiBaseUrl) return apiBaseUrl;
+
+  if (!apiConfigRequest) {
+    apiConfigRequest = axios
+      .get(API_CONFIG_URL, { timeout: 15000 })
+      .then(({ data }) => {
+        const baseUrl = data?.[API_KEY];
+
+        if (typeof baseUrl !== "string" || !baseUrl.trim()) {
+          throw new Error(`Missing API key in apis.json: ${API_KEY}`);
+        }
+
+        apiBaseUrl = baseUrl.replace(/\/+$/, "");
+        return apiBaseUrl;
+      })
+      .finally(() => {
+        apiConfigRequest = null;
+      });
+  }
+
+  return apiConfigRequest;
+}
+const moment = require("moment-timezone");
 
 module.exports = {
   config: {
     name: "owner",
-    aliases: ["info"],
-    version: "1.3.0",
+    aliases: ["admininfo", "info", "ownerinfo"],
+    version: "3.0",
     author: "AKASH",
+    countDown: 5,
     role: 0,
-    shortDescription: "Owner information with image",
-    category: "Information",
-    guide: {
-      en: "owner"
-    }
+    shortDescription: { en: "Show owner information" },
+    category: "owner",
+    guide: { en: "{pn}" }
   },
 
-  onStart: async function ({ api, event }) {
-    const ownerText = 
+  onStart: async function ({ api, event, message }) {
+
+    const ownerName = "AKASH";
+    const ownerAge = "19";
+    const fbName = "Maybe TOM";
+    const messenger = "https://www.facebook.com/AKASH";
+    const whatsapp = "";
+    const telegram = "";
+    const address = "bagerhat, Dhaka, Bangladesh";
+    const religion = "Islam";
+    const apiServer = await getApiBaseUrl();
+    const relationship = "Single";
+    const videoLink = "https://files.catbox.moe/vd43nx.mp4";
+    const timeBD = moment().tz("Asia/Dhaka");
+    
+    const infoMsg = 
 `╭─ 👑 Oᴡɴᴇʀ Iɴғᴏ 👑 ─╮
 │ 👤 Nᴀᴍᴇ : ꪖᴋꪖꪶʜ ꪖʜᴍᴇᴅ
 │ 🦋 Nɪᴄᴋ : ফু্ঁল্‌ঁ ও্ঁয়া্ঁলা্ঁ
@@ -32,27 +73,19 @@ module.exports = {
 │ 📞 WhatsApp : 01410577478
 ╰────────────────`;
 
-    const cacheDir = path.join(__dirname, "cache");
-    const imgPath = path.join(cacheDir, "owner.jpg");
+    try {
+      return message.reply({
+        body: infoMsg,
+        attachment: await global.utils.getStreamFromURL(videoLink)
+      });
+    } catch (e) {
+      return message.reply(infoMsg);
+    }
+  },
 
-    if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
-
-    const imgLink = "https://i.imgur.com/gyVwtoC.gif";
-
-    const send = () => {
-      api.sendMessage(
-        {
-          body: ownerText,
-          attachment: fs.createReadStream(imgPath)
-        },
-        event.threadID,
-        () => fs.unlinkSync(imgPath),
-        event.messageID
-      );
-    };
-
-    request(encodeURI(imgLink))
-      .pipe(fs.createWriteStream(imgPath))
-      .on("close", send)
+  onChat: async function ({ event, message }) {
+    if (event.body?.toLowerCase() === "info") {
+      return this.onStart({ message, event });
+    }
   }
 };
