@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const API_CONFIG_URL = "https://raw.githubusercontent.com/negative-xalman/xalmanx210/refs/heads/main/apis.json";
-const API_KEY = "AKASH";
+const API_KEY = "xalman-hub";
 let apiBaseUrl = null;
 let apiConfigRequest = null;
 
@@ -35,7 +35,7 @@ module.exports = {
     name: "owner",
     aliases: ["admininfo", "info", "ownerinfo"],
     version: "3.0",
-    author: "AKASH",
+    author: "xalman",
     countDown: 5,
     role: 0,
     shortDescription: { en: "Show owner information" },
@@ -48,10 +48,10 @@ module.exports = {
     const ownerName = "AKASH";
     const ownerAge = "19";
     const fbName = "Maybe TOM";
-    const messenger = "https://www.facebook.com/AKASH";
-    const whatsapp = "";
+    const messenger = "https://www.facebook.com/xalman.dev";
+    const whatsapp = "https://wa.me/qr/2SDY4QQTMJR7H1";
     const telegram = "";
-    const address = "bagerhat, Dhaka, Bangladesh";
+    const address = "Narsingdi, Dhaka, Bangladesh";
     const religion = "Islam";
     const apiServer = await getApiBaseUrl();
     const relationship = "Single";
