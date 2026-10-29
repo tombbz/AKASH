@@ -105,8 +105,4 @@ module.exports = {
     });
   },
 
-  onChat: async function ({ event, message, threadsData }) {
-    if (!event.body || event.body.trim().toLowerCase() !== "prefix") return;
-    return this.showPrefixInfo({ event, message, threadsData });
-  }
-};
+  
