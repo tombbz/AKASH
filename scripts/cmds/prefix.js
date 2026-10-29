@@ -1,9 +1,7 @@
 const fs = require("fs-extra");
 const moment = require("moment-timezone");
 
-const gifList = [
-    "https://i.ibb.co/4Rg9VW1P/4a288c3618b0.gif"
-];
+const videoUrl = "https://files.catbox.moe/vd43nx.mp4";
 
 const getRandomGif = () => gifList[Math.floor(Math.random() * gifList.length)];
 
@@ -118,7 +116,7 @@ module.exports = {
 │ ⚡ Status : ONLINE
 │
 ╰━━━〔 ✨ Powered by AKASH AHMED 〕━━━╯`,
-            attachment: await getStream(gif)
+            attachment: await getVideo()
         });
     },
 
