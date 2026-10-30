@@ -35,8 +35,8 @@ module.exports = {
 "│ 📚 Eᴅᴜᴄᴀᴛɪᴏɴ : 𝗜𝗻𝘁𝗲𝗿 𝟭𝘀𝘁 𝗬𝗲𝗮𝗿\n" +
 "│ 🏡 Lᴏᴄᴀᴛɪᴏɴ : 𝗞𝗵𝘂𝗹𝗻𝗮\n" +
 "├─ 🔗 Cᴏɴᴛᴀᴄᴛ ─╮\n" +
-"│ 📘 Facebook : id=61590496500848\n" +
-"│ 💬 Messenger: id=61590496500848\n" +
+"│ 📘 Facebook : id=61595794810986\n" +
+"│ 💬 Messenger: id=61595794810986\n" +
 "│ 📞 WhatsApp : 01410577478\n" +
 "╰────────────────",
         attachment: fs.createReadStream(videoPath)
