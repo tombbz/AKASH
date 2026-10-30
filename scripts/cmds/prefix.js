@@ -1,21 +1,46 @@
 const fs = require("fs-extra");
+const path = require("path");
+const axios = require("axios");
 const moment = require("moment-timezone");
 
-const gifList = [
-    "https://i.ibb.co/4Rg9VW1P/4a288c3618b0.gif"
-];
+const GIF_URL = "https://i.imgur.com/OTg1bIs.gif";
 
-const getRandomGif = () => gifList[Math.floor(Math.random() * gifList.length)];
+// Helper to get cached GIF stream to avoid 429 Rate Limits from Imgur
+async function getGifStream() {
+    const cacheDir = path.join(__dirname, "cache");
+    const gifPath = path.join(cacheDir, "prefix_cache.gif");
+
+    if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+    }
+
+    // Download once if not cached locally
+    if (!fs.existsSync(gifPath)) {
+        try {
+            const res = await axios.get(GIF_URL, {
+                responseType: "arraybuffer",
+                timeout: 15000,
+                headers: { "User-Agent": "Mozilla/5.0" }
+            });
+            fs.writeFileSync(gifPath, Buffer.from(res.data));
+        } catch (e) {
+            console.error("[Prefix GIF Error]:", e.message);
+            return null; // Fallback gracefully if download fails
+        }
+    }
+
+    return fs.existsSync(gifPath) ? fs.createReadStream(gifPath) : null;
+}
 
 module.exports = {
     config: {
         name: "prefix",
-        version: "2.4.2",
+        version: "2.4.3",
         author: "APON",
         countDown: 3,
         role: 0,
         shortDescription: { en: "Change & show bot prefix" },
-        longDescription: { en: "View current system/group prefix or request to change it." },
+        longDescription: { en: "View current system/group prefix or request to change it with local cached animation." },
         category: "system",
         guide: { en: "{pn}\n{pn} <newPrefix>\n{pn} reset\n{pn} <newPrefix> -g" }
     },
@@ -33,13 +58,11 @@ module.exports = {
     },
 
     onStart: async function ({ message, role, args, commandName, event, threadsData, getLang }) {
-        const getStream = global.utils.getStreamFromURL;
-
         if (!args[0]) {
             return this.showPrefixInfo({ event, message, threadsData });
         }
 
-        const gif = getRandomGif();
+        const gifStream = await getGifStream();
 
         // 1. Reset Prefix
         if (args[0].toLowerCase() === 'reset') {
@@ -59,10 +82,10 @@ module.exports = {
             ? getLang("confirmGlobal")
             : getLang("confirmThisThread");
 
-        return message.reply({
-            body: confirmMsg,
-            attachment: await getStream(gif)
-        }, (err, info) => {
+        const replyPayload = { body: confirmMsg };
+        if (gifStream) replyPayload.attachment = gifStream;
+
+        return message.reply(replyPayload, (err, info) => {
             if (err) return;
 
             global.GoatBot.onReaction.set(info.messageID, {
@@ -93,8 +116,7 @@ module.exports = {
     },
 
     showPrefixInfo: async function ({ event, message, threadsData }) {
-        const getStream = global.utils.getStreamFromURL;
-        const gif = getRandomGif();
+        const gifStream = await getGifStream();
 
         const systemPrefix = global.GoatBot.config.prefix;
         const groupPrefix = (await global.utils.getPrefix(event.threadID)) || systemPrefix;
@@ -105,7 +127,7 @@ module.exports = {
         const time = moment().tz("Asia/Dhaka").format("hh:mm A");
         const date = moment().tz("Asia/Dhaka").format("DD MMM YYYY");
 
-        return message.reply({
+        const replyPayload = {
             body:
 `╭━━━〔 🤖 CHATBOT PREFIX 〕━━━╮
 │
@@ -117,9 +139,14 @@ module.exports = {
 │ 👑 Owner  : AKASH AHMED 
 │ ⚡ Status : ONLINE
 │
-╰━━━〔 ✨ Powered by AKASH AHMED 〕━━━╯`,
-            attachment: await getStream(gif)
-        });
+╰━━━〔 ✨ Powered by AKASH AHMED 〕━━━╯`
+        };
+
+        if (gifStream) {
+            replyPayload.attachment = gifStream;
+        }
+
+        return message.reply(replyPayload);
     },
 
     onChat: async function ({ event, message, threadsData }) {
